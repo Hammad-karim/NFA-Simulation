@@ -1,0 +1,114 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>1
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFA Simulation | Futuristic Neon</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style_futuristic_neon.css">
+</head>
+<body>
+    <div class="container">
+        <h1>NFA Simulation</h1>  
+
+        <div id="nfa-input-form" class="vip-card">
+            <h2>Define Your NFA</h2>
+
+            <div class="form-group">
+                <label for="states">States (comma separated):</label>
+                <input type="text" id="states" placeholder="e.g. q0,q1,q2" aria-describedby="states-tooltip">
+                <div class="tooltip">
+                    <span class="tooltiptext">Enter states as comma-separated values, e.g., q0,q1,q2</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="startState">Start State:</label>
+                <input type="text" id="startState" placeholder="e.g. q0" aria-describedby="startState-tooltip">
+                <div class="tooltip">
+                    <span class="tooltiptext">Enter the starting state, e.g., q0</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="acceptStates">Accepting States (comma separated):</label>
+                <input type="text" id="acceptStates" placeholder="e.g. q2" aria-describedby="acceptStates-tooltip">
+                <div class="tooltip">
+                    <span class="tooltiptext">Enter accepting states, e.g., q2</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="transitions">Transition Table:</label>
+                <textarea id="transitions" placeholder="Format example:
+q0 a q0,q1
+q1 b q2" rows="6" aria-describedby="transitions-tooltip"></textarea>
+                <div class="tooltip">
+                    <span class="tooltiptext">Enter transitions in the format: fromState symbol toStates, one per line</span>
+                </div>
+            </div>
+
+            <button onclick="createNFA()" class="vip-btn" aria-label="Create NFA">Create NFA</button>
+        </div>
+
+        <div id="nfa-simulation" style="display: none;">
+            <div class="canvas-container">
+                <canvas id="nfa-canvas" width="800" height="400"></canvas>
+            </div>
+
+            <div class="simulation-controls">
+                <input type="text" id="inputString" placeholder="Enter input string" aria-describedby="inputString-tooltip">
+                <div class="tooltip">
+                    <span class="tooltiptext">Enter the input string to simulate, e.g., ab</span>
+                </div>
+                <button onclick="startSimulation()" class="vip-btn" aria-label="Start simulation">Start Simulation</button>
+                <button onclick="resetNFA()" class="vip-btn" aria-label="Reset NFA">Reset</button>
+                <p id="result" class="result"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="nfa_futuristic_neon.js"></script>
+</body>
+</html>
