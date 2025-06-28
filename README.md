@@ -1,1 +1,2 @@
 # NFA-Simulation
+This project visually simulates a Non-deterministic Finite Automaton (NFA) to help users understand the working of finite automata through interactive animations. Built with HTML, CSS, and vanilla JavaScript, it allows users to input custom NFAs, test strings, and visualize state transitions in real time. Ideal for students and educators in computer science, especially those studying automata theory or formal languages.
